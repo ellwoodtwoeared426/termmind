@@ -44,6 +44,7 @@ SLASH_COMMANDS = [
     "/clear", "/save", "/load", "/sessions", "/model", "/models", "/provider",
     "/providers", "/cost", "/theme", "/themes", "/undo", "/diff", "/status",
     "/git", "/export", "/compact", "/system", "/help", "/version", "/quit",
+    "/index", "/symbols", "/capabilities",
 ]
 
 
@@ -632,6 +633,88 @@ def config():
         key = display["api_key"]
         display["api_key"] = f"{key[:8]}...{key[-4:]}" if len(key) > 12 else "****"
     console.print_json(json=display)
+
+
+@main.command()
+@click.argument("action", default="install", type=click.Choice(["install", "generate", "capabilities"]))
+def completions(action: str):
+    """Manage shell completions."""
+    from .shell import install_completions, generate_all_completions, get_capability_report
+    if action == "install":
+        success, msg = install_completions()
+        if success:
+            click.echo(f"✅ {msg}")
+        else:
+            click.echo(f"⚠ {msg}")
+    elif action == "generate":
+        output_dir = str(Path.home() / ".termind" / "completions")
+        results = generate_all_completions(output_dir)
+        for shell, path in results.items():
+            click.echo(f"  {shell}: {path}")
+    elif action == "capabilities":
+        report = get_capability_report()
+        click.echo(json.dumps(report, indent=2))
+
+
+@main.command()
+@click.argument("path", default=".")
+@click.option("--force", "-f", is_flag=True, help="Rebuild from scratch")
+@click.option("--query", "-q", help="Query the index for matching symbols")
+def index(path: str, force: bool, query: str):
+    """Build or query the code context index."""
+    from .memory import build_index, get_project_summary, get_context_for_query
+    console = _get_console()
+    if query:
+        ctx = get_context_for_query(path, query)
+        if ctx:
+            from rich.markdown import Markdown
+            console.print(Markdown(ctx))
+        else:
+            console.print("[dim]No matching symbols found.[/dim]")
+        return
+    console.print("[system]Building code index...[/system]")
+    import time
+    start = time.time()
+    idx = build_index(path, force=force)
+    elapsed = time.time() - start
+    summary = get_project_summary(path)
+    table = Table(title="Code Index", border_style="dim")
+    table.add_column("Metric", style="info")
+    table.add_column("Value")
+    table.add_row("Files", str(summary["total_files"]))
+    table.add_row("Functions", str(summary["total_functions"]))
+    table.add_row("Classes", str(summary["total_classes"]))
+    table.add_row("Languages", ", ".join(summary["languages"]))
+    table.add_row("Build time", f"{elapsed:.2f}s")
+    table.add_row("Cached", str(Path.home() / ".termind" / "memory" / idx.project_hash))
+    console.print(table)
+
+
+@main.command()
+@click.argument("path", default=".")
+@click.option("--pattern", "-p", default="", help="Regex pattern to filter names")
+@click.option("--type", "sym_type", default="all", type=click.Choice(["all", "functions", "classes"]))
+def symbols(path: str, pattern: str, sym_type: str):
+    """List functions and classes in the project index."""
+    from .memory import query_functions, query_classes, build_index
+    console = _get_console()
+    table = Table(title="Symbols", border_style="dim")
+    table.add_column("Name", style="cyan")
+    table.add_column("Type", style="dim")
+    table.add_column("Signature")
+    table.add_column("File", style="file_path")
+    table.add_column("Line", justify="right")
+
+    if sym_type in ("all", "functions"):
+        for func in query_functions(path, pattern):
+            table.add_row(func["name"], "func", func.get("signature", ""),
+                          func.get("file", ""), str(func.get("line", 0)))
+    if sym_type in ("all", "classes"):
+        for cls in query_classes(path, pattern):
+            bases = ", ".join(cls.get("bases", []))
+            table.add_row(cls["name"], "class", f"class {cls['name']}({bases})",
+                          cls.get("file", ""), str(cls.get("line", 0)))
+    console.print(table)
 
 
 @main.command()

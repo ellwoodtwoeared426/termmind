@@ -55,6 +55,7 @@ def handle_command(
         "export": cmd_export, "compact": cmd_compact, "system": cmd_system,
         "version": cmd_version, "quit": cmd_quit, "q": cmd_quit,
         "exit": cmd_quit,
+        "index": cmd_index, "symbols": cmd_symbols, "capabilities": cmd_capabilities,
     }
     handler = handlers.get(sub)
     if handler:
@@ -409,8 +410,8 @@ def cmd_undo(rest: str, messages, client, console, cwd, ctx_files):
 
 
 def cmd_diff(rest: str, messages, client, console, cwd, ctx_files):
+    from .diff_engine import compute_diff_from_disk, render_diff_inline
     if rest:
-        # Show diff for specific file
         p = os.path.join(cwd, rest) if not os.path.isabs(rest) else rest
         content = read_file(p)
         if content is None:
@@ -419,13 +420,21 @@ def cmd_diff(rest: str, messages, client, console, cwd, ctx_files):
         history = get_undo_history()
         for fp, old_content, _ in reversed(history):
             if os.path.abspath(fp) == os.path.abspath(p):
+                fd = compute_diff_from_disk(p, content)
+                # Temporarily set old_content for rendering
+                import dataclasses
+                fd.old_content = old_content
+                fd.hunks = []
                 import difflib
-                diff = difflib.unified_diff(
+                diff_text = "".join(difflib.unified_diff(
                     old_content.splitlines(keepends=True),
                     content.splitlines(keepends=True),
                     fromfile=f"a/{rest}", tofile=f"b/{rest}",
-                )
-                console.print("".join(diff))
+                ))
+                from .diff_engine import _parse_unified_diff
+                fd.hunks = _parse_unified_diff(diff_text)
+                fd.edit_type = fd.edit_type if fd.edit_type.value != "identical" else __import__("termind.diff_engine", fromlist=["EditType"]).EditType.REPLACE
+                render_diff_inline(fd, console)
                 return
         console.print("[system]No changes recorded for this file.[/system]")
         return
@@ -433,6 +442,11 @@ def cmd_diff(rest: str, messages, client, console, cwd, ctx_files):
     if not diffs:
         console.print("[system]No changes this session.[/system]")
         return
+    from .diff_engine import compute_file_diff, render_diff_inline, MultiFileDiff
+    multi = MultiFileDiff()
+    for filepath, diff in diffs:
+        multi.files.append(compute_file_diff("", "", filepath, filepath))
+    # Fallback to simple display
     for filepath, diff in diffs:
         console.print(f"[file_path]{filepath}[/file_path]")
         console.print(diff)
@@ -608,6 +622,59 @@ def cmd_system(rest: str, messages, client, console, cwd, ctx_files):
     cfg["system_prompt"] = rest
     save_config(cfg)
     console.print("[success]✅ System prompt updated.[/success]")
+
+
+def cmd_index(rest: str, messages, client, console, cwd, ctx_files):
+    import time
+    from .memory import build_index, get_project_summary
+    force = "--force" in rest or "-f" in rest
+    console.print("[system]Building code index...[/system]")
+    start = time.time()
+    idx = build_index(cwd, force=force)
+    elapsed = time.time() - start
+    summary = get_project_summary(cwd)
+    table = Table(title="Code Index", border_style="dim")
+    table.add_column("Metric", style="info")
+    table.add_column("Value")
+    table.add_row("Files", str(summary["total_files"]))
+    table.add_row("Functions", str(summary["total_functions"]))
+    table.add_row("Classes", str(summary["total_classes"]))
+    table.add_row("Languages", ", ".join(summary["languages"]))
+    table.add_row("Build time", f"{elapsed:.2f}s")
+    console.print(table)
+
+
+def cmd_symbols(rest: str, messages, client, console, cwd, ctx_files):
+    from .memory import query_functions, query_classes, build_index
+    parts = rest.strip().split(maxsplit=1)
+    pattern = parts[0] if parts else ""
+    table = Table(title="Symbols", border_style="dim")
+    table.add_column("Name", style="cyan")
+    table.add_column("Type", style="dim")
+    table.add_column("File", style="file_path")
+    table.add_column("Line", justify="right")
+    for func in query_functions(cwd, pattern):
+        table.add_row(func["name"], "func", func.get("file", ""), str(func.get("line", 0)))
+    for cls in query_classes(cwd, pattern):
+        table.add_row(cls["name"], "class", cls.get("file", ""), str(cls.get("line", 0)))
+    console.print(table)
+
+
+def cmd_capabilities(rest: str, messages, client, console, cwd, ctx_files):
+    from .shell import get_capability_report
+    report = get_capability_report()
+    table = Table(title="Terminal Capabilities", border_style="dim")
+    table.add_column("Capability", style="info")
+    table.add_column("Value")
+    table.add_row("Shell", report["shell"])
+    table.add_row("Terminal", f"{report['term_program']} ({report['term']})")
+    table.add_row("Size", f"{report['terminal_size']['rows']}×{report['terminal_size']['cols']}")
+    table.add_row("True Color", "✅" if report["truecolor"] else "❌")
+    table.add_row("Unicode", "✅" if report["unicode"] else "❌")
+    table.add_row("Emoji", "✅" if report["emoji"] else "❌")
+    for k, v in report["copy_paste"].items():
+        table.add_row(f"Clipboard: {k}", "✅" if v else "❌")
+    console.print(table)
 
 
 def cmd_version(rest: str, messages, client, console, cwd, ctx_files):

@@ -1,0 +1,40 @@
+services:
+  termmind:
+    build: .
+    image: termmind:latest
+    container_name: termmind-dev
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount current directory for live editing
+      - .:/workspace
+      # Persist config and sessions
+      - termmind-home:/home/termmind/.termind
+    environment:
+      # Pass through API keys from host
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - TOGETHER_API_KEY=${TOGETHER_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - TERMIND_PROVIDER=${TERMIND_PROVIDER:-ollama}
+      - TERMIND_MODEL=${TERMIND_MODEL:-}
+    # For local Ollama access
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Optional: Ollama service for fully local development
+  ollama:
+    image: ollama/ollama:latest
+    container_name: termmind-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    profiles:
+      - local-llm
+
+volumes:
+  termmind-home:
+  ollama-data:

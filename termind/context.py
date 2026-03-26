@@ -202,6 +202,15 @@ def build_context(
         rel = os.path.relpath(fpath, directory)
         parts.append(f"## File: {rel}\n```\n{content}\n```\n")
 
+    # Code index context (if available)
+    try:
+        from .memory import get_context_for_query
+        index_ctx = get_context_for_query(directory, query)
+        if index_ctx:
+            parts.append(index_ctx + "\n")
+    except Exception:
+        pass
+
     return "\n".join(parts)
 
 
