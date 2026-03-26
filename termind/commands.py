@@ -24,6 +24,9 @@ from .git import (
 from .sessions import list_sessions, load_session, save_session, export_session
 from .themes import list_themes
 from .utils import calculate_cost, estimate_tokens, render_markdown
+from .snippets import cmd_snippet
+from .templates import cmd_template
+from .refactor import cmd_refactor
 from . import __version__
 
 if TYPE_CHECKING:
@@ -56,6 +59,9 @@ def handle_command(
         "version": cmd_version, "quit": cmd_quit, "q": cmd_quit,
         "exit": cmd_quit,
         "index": cmd_index, "symbols": cmd_symbols, "capabilities": cmd_capabilities,
+        "snippet": cmd_snippet, "snippets": cmd_snippet,
+        "template": cmd_template, "templates": cmd_template,
+        "refactor": cmd_refactor, "refactoring": cmd_refactor,
     }
     handler = handlers.get(sub)
     if handler:
@@ -110,6 +116,30 @@ def cmd_help(rest: str, messages, client, console, cwd, ctx_files):
         ("/version", "Show version", False),
         ("/help", "Show this help", False),
         ("/quit", "Exit TermMind", False),
+        ("Snippets", "", True),
+        ("/snippet save <name>", "Save code/context as snippet", False),
+        ("/snippet list", "List saved snippets", False),
+        ("/snippet load <name>", "Load snippet into context", False),
+        ("/snippet search <q>", "Search snippets", False),
+        ("/snippet delete <name>", "Delete a snippet", False),
+        ("/snippet export [path]", "Export snippets as JSON", False),
+        ("/snippet import <file>", "Import snippets from JSON", False),
+        ("/snippet suggest", "Suggest relevant snippets", False),
+        ("Templates", "", True),
+        ("/template list", "List project templates", False),
+        ("/template use <name>", "Scaffold a project", False),
+        ("Refactoring", "", True),
+        ("/refactor <op> <file>", "AI-powered refactoring", False),
+        ("/refactor sort-imports <f>", "Sort imports (PEP 8)", False),
+        ("/refactor add-types <f>", "Add type hints", False),
+        ("/refactor simplify <f>", "Simplify complex code", False),
+        ("/refactor dead-code <f>", "Remove dead code", False),
+        ("/refactor extract-fn <f>", "Extract a function", False),
+        ("/refactor rename <f>", "Rename identifiers", False),
+        ("/refactor inline <f>", "Inline variables/functions", False),
+        ("/refactor extract-class <f>", "Extract into a class", False),
+        ("/refactor history", "Show refactor history", False),
+        ("/refactor undo", "Undo last refactoring", False),
     ]
     for cmd, desc, is_header in commands:
         if is_header:

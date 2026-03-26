@@ -45,6 +45,13 @@ SLASH_COMMANDS = [
     "/providers", "/cost", "/theme", "/themes", "/undo", "/diff", "/status",
     "/git", "/export", "/compact", "/system", "/help", "/version", "/quit",
     "/index", "/symbols", "/capabilities",
+    "/snippet", "/snippets", "/snippet save", "/snippet list", "/snippet load",
+    "/snippet search", "/snippet delete", "/snippet export", "/snippet import",
+    "/snippet suggest",
+    "/template", "/templates", "/template list", "/template use",
+    "/refactor", "/refactor extract-function", "/refactor rename", "/refactor inline",
+    "/refactor extract-class", "/refactor simplify", "/refactor dead-code",
+    "/refactor sort-imports", "/refactor add-types", "/refactor undo", "/refactor history",
 ]
 
 

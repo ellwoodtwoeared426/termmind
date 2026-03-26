@@ -36,6 +36,9 @@ Think Claude Code or Aider, but **free, open-source, and lightweight**.
 - 🔍 **Code search** — Find anything in your project files
 - 🐙 **Git integration** — Status, diff, log, and AI-generated commit messages
 - ⚡ **Streaming** — See responses as they're generated, not after
+- 📦 **Snippet Manager** — Save, search, and reuse code snippets with template variables
+- 🏗️ **Project Templates** — Scaffold projects from 8 built-in templates (Python, FastAPI, React, Next.js, etc.)
+- 🔧 **Refactoring Engine** — AI-powered refactoring with diff preview, confirmation, and undo
 
 ## 🚀 Installation
 
@@ -122,6 +125,14 @@ Inside `termind chat`, use slash commands:
 | `/diff` | Show session changes |
 | `/status` | Git status + context info |
 | `/git [status/log/diff]` | Git operations |
+| `/snippet save <name>` | Save code as a snippet |
+| `/snippet list` | List saved snippets |
+| `/snippet load <name>` | Load snippet into context |
+| `/snippet search <query>` | Search snippets |
+| `/template list` | List project templates |
+| `/template use <name>` | Scaffold a project |
+| `/refactor <op> <file>` | AI-powered refactoring |
+| `/refactor undo` | Undo last refactoring |
 | `/help` | Show all commands |
 
 ## 🔑 Provider Setup
@@ -289,6 +300,39 @@ These features set TermMind apart from every other AI coding assistant:
 - **Auto-resize handling** — responds to terminal resize events
 - **One-command install** — `termind completions install`
 
+### 📦 Snippet Manager
+- **Save snippets** from conversations — extracts code blocks automatically
+- **Search** by name, description, tags, or code content with relevance scoring
+- **Template variables** — `{{filename}}`, `{{datetime}}`, `{{user}}`, `{{cwd}}`, `{{year}}`, etc.
+- **Auto-suggest** relevant snippets based on conversation context
+- **Import/Export** — share snippet collections as JSON files
+- **Usage tracking** — tracks how often each snippet is used
+- **Language detection** — auto-detects programming language from content
+- Stored in `~/.termind/snippets/` — portable and shareable
+
+### 🏗️ Project Templates
+- **8 built-in templates** — scaffold complete projects instantly:
+  - `python-package` — Modern Python package with pyproject.toml, tests, CI
+  - `fastapi-api` — FastAPI REST API with auth, DB, Docker
+  - `flask-api` — Flask REST API with SQLAlchemy
+  - `cli-tool` — Python CLI tool with click
+  - `react-app` — React + TypeScript + Vite
+  - `nextjs-app` — Next.js with App Router
+  - `express-api` — Express.js REST API
+  - `django-app` — Django with Django REST Framework
+- **Template variables** — `{{project_name}}`, `{{module_name}}`, `{{author}}`, etc.
+- **Custom templates** — add your own to `~/.termind/templates/`
+- **Post-generation instructions** — clear next steps for each template
+
+### 🔧 Refactoring Engine
+- **8 refactoring operations** — extract-function, rename, inline, extract-class, simplify, dead-code, sort-imports, add-types
+- **AI-powered** — uses your configured model for intelligent refactoring
+- **Diff preview** — see exactly what will change before applying
+- **Confirmation step** — approve or reject each refactoring
+- **Undo support** — every refactoring is tracked and reversible
+- **History** — view past refactorings with `/refactor history`
+- **Local sort-imports** — PEP 8 import sorting without AI needed
+
 ## ⚡ Performance
 
 | Operation | Time |
@@ -342,12 +386,17 @@ termmind/
 │   ├── diff_engine.py    # Smart diff preview system
 │   ├── memory.py         # Code context memory/index
 │   ├── shell.py          # Shell integration & completions
+│   ├── snippets.py       # Snippet manager (save/search/reuse)
+│   ├── templates.py      # Project scaffolding templates
+│   ├── refactor.py       # AI-powered refactoring engine
 │   └── utils.py          # Token counting, utilities
 ├── tests/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── pyproject.toml
 ├── README.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
 ├── CONTRIBUTING.md
 └── LICENSE
 ```
@@ -362,6 +411,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
 - Plugin development
 - Testing guidelines
 - PR and issue templates
+
+## 📜 Code of Conduct
+
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+By participating, you agree to uphold this standard.
+
+## 🔒 Security
+
+See [SECURITY.md](SECURITY.md) for our security policy, supported versions, and
+vulnerability reporting guidelines.
 
 Quick start:
 1. Fork the repository
