@@ -52,6 +52,10 @@ SLASH_COMMANDS = [
     "/refactor", "/refactor extract-function", "/refactor rename", "/refactor inline",
     "/refactor extract-class", "/refactor simplify", "/refactor dead-code",
     "/refactor sort-imports", "/refactor add-types", "/refactor undo", "/refactor history",
+    "/record", "/record start", "/record stop", "/record list", "/record replay", "/record export",
+    "/voice", "/voice on", "/voice off", "/voice speed", "/voice lang",
+    "/eli5", "/eli5 mode on", "/eli5 mode off", "/eli5 status",
+    "/cost optimize", "/cost history", "/cost budget", "/cost compare", "/cost save",
 ]
 
 

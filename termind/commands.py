@@ -62,6 +62,9 @@ def handle_command(
         "snippet": cmd_snippet, "snippets": cmd_snippet,
         "template": cmd_template, "templates": cmd_template,
         "refactor": cmd_refactor, "refactoring": cmd_refactor,
+        "record": cmd_record,
+        "voice": cmd_voice,
+        "eli5": cmd_eli5,
     }
     handler = handlers.get(sub)
     if handler:
@@ -713,3 +716,181 @@ def cmd_version(rest: str, messages, client, console, cwd, ctx_files):
 
 def cmd_quit(rest: str, messages, client, console, cwd, ctx_files):
     raise SystemExit(0)
+
+
+def cmd_eli5(rest: str, messages, client, console, cwd, ctx_files):
+    """Explain Like I'm 5 mode."""
+    if not hasattr(cmd_eli5, 'eli5'):
+        from .eli5 import ELI5Mode
+        cmd_eli5.eli5 = ELI5Mode()
+    if rest.strip() == "mode on":
+        cmd_eli5.eli5.enable()
+        console.print("🧒 [green]ELI5 Mode ON[/green] — Responses will be simplified")
+    elif rest.strip() == "mode off":
+        cmd_eli5.eli5.disable()
+        console.print("🧒 [yellow]ELI5 Mode OFF[/yellow]")
+    elif rest.strip() == "status":
+        console.print(cmd_eli5.eli5.get_status_text())
+    elif rest.strip():
+        # Explain the given topic
+        prompt = cmd_eli5.eli5.modify_user_message(rest)
+        messages.append({"role": "user", "content": prompt})
+        sys_prompt = cmd_eli5.eli5.get_system_prompt()
+        extra = {"system": sys_prompt} if sys_prompt else {}
+        response = client.send_message(messages, **extra)
+        console.print(f"\n{response}\n")
+        messages.append({"role": "assistant", "content": response})
+    else:
+        console.print(cmd_eli5.eli5.get_help_text())
+
+
+def cmd_voice(rest: str, messages, client, console, cwd, ctx_files):
+    """Voice mode controls."""
+    if not hasattr(cmd_voice, 'voice'):
+        from .voice import VoiceMode
+        cmd_voice.voice = VoiceMode()
+    if rest.strip() == "on":
+        cmd_voice.voice.enable()
+        console.print("🔊 [green]Voice Mode ON[/green] — AI responses will be spoken aloud")
+    elif rest.strip() == "off":
+        cmd_voice.voice.disable()
+        console.print("🔇 [yellow]Voice Mode OFF[/yellow]")
+    elif rest.strip().startswith("speed"):
+        try:
+            speed = float(rest.split()[-1])
+            cmd_voice.voice.set_speed(speed)
+            console.print(f"🔊 Speed set to {speed}x")
+        except (ValueError, IndexError):
+            console.print(cmd_voice.voice.get_help_text())
+    elif rest.strip().startswith("lang"):
+        lang = rest.split()[-1] if len(rest.split()) > 1 else "en"
+        cmd_voice.voice.set_language(lang)
+        console.print(f"🔊 Language set to {lang}")
+    else:
+        console.print(cmd_voice.voice.get_help_text())
+
+
+def cmd_record(rest: str, messages, client, console, cwd, ctx_files):
+    """Session recording controls."""
+    if not hasattr(cmd_record, 'recorder'):
+        from .recorder import SessionRecorder
+        cmd_record.recorder = SessionRecorder()
+    if rest.strip() == "start":
+        cmd_record.recorder.start()
+        console.print("🔴 [green]Recording started[/green]")
+    elif rest.strip() == "stop":
+        name = cmd_record.recorder.stop()
+        console.print(f"⏹️ [yellow]Recording saved: {name}[/yellow]")
+    elif rest.strip() == "list":
+        recordings = cmd_record.recorder.list_recordings()
+        if not recordings:
+            console.print("No recordings found")
+        else:
+            from rich.table import Table
+            table = Table(title="Recordings")
+            table.add_column("Name", style="cyan")
+            table.add_column("Date")
+            table.add_column("Events")
+            table.add_column("Duration")
+            for r in recordings:
+                table.add_row(r["name"], r["date"], str(r["events"]), r.get("duration", "N/A"))
+            console.print(table)
+    elif rest.strip().startswith("replay"):
+        parts = rest.strip().split()
+        speed = 1.0
+        name = None
+        for i, p in enumerate(parts):
+            if p == "--speed" and i + 1 < len(parts):
+                speed = float(parts[i + 1])
+            elif p != "replay":
+                name = p
+        if name:
+            console.print(f"▶️ Replaying {name} (speed: {speed}x)...")
+            events = cmd_record.recorder.replay(name, speed)
+            for event in events:
+                console.print(f"  [{event['time']}] {event['type']}: {event.get('summary', '')[:80]}")
+        else:
+            console.print("Usage: /record replay <name> [--speed 2x]")
+    elif rest.strip().startswith("export"):
+        name = rest.strip().split()[-1] if len(rest.strip().split()) > 1 else None
+        if name:
+            path = cmd_record.recorder.export_html(name)
+            console.print(f"📄 Exported to: {path}")
+        else:
+            console.print("Usage: /record export <name>")
+    else:
+        console.print("""🔴 Recording Controls:
+  /record start         — Start recording
+  /record stop          — Stop and save
+  /record list          — List recordings
+  /record replay <name> — Replay a recording
+  /record export <name> — Export as HTML
+  /record replay <name> --speed 2x""")
+
+
+def cmd_cost(rest: str, messages, client, console, cwd, ctx_files):
+    """Cost tracking and optimization."""
+    if not hasattr(cmd_cost, 'optimizer'):
+        from .cost_optimizer import CostOptimizer
+        cmd_cost.optimizer = CostOptimizer()
+    if rest.strip() == "analyze" or rest.strip() == "":
+        console.print(cmd_cost.optimizer.get_analysis_text())
+    elif rest.strip() == "history":
+        daily = cmd_cost.optimizer.get_daily_history(30)
+        from rich.table import Table
+        table = Table(title="Cost History (30 days)")
+        table.add_column("Date", style="cyan")
+        table.add_column("Cost", style="green")
+        for d in daily:
+            table.add_row(d["date"], f"${d['cost']:.4f}")
+        console.print(table)
+    elif rest.strip().startswith("budget"):
+        try:
+            amount = float(rest.split()[-1])
+            cmd_cost.optimizer.set_budget(amount)
+            console.print(f"💰 Budget set to ${amount:.2f}")
+        except ValueError:
+            budget = cmd_cost.optimizer.get_budget_status()
+            if budget:
+                console.print(f"Budget: ${budget['spent']:.2f} / ${budget['budget']:.2f} ({budget['percent']:.0f}%)")
+            else:
+                console.print("No budget set. Usage: /cost budget <amount>")
+    elif rest.strip() == "optimize":
+        result = cmd_cost.optimizer.optimize_context(messages, "openai", "gpt-4")
+        console.print(f"\n📊 Context: ~{result['current_context_tokens']:,} tokens")
+        console.print(f"💰 Estimated cost: ${result['estimated_request_cost']:.6f}")
+        if result["suggestions"]:
+            console.print(f"\n💡 Savings: ~{result['total_potential_savings_tokens']:,} tokens possible")
+            from rich.table import Table
+            table = Table(title="Optimization Suggestions")
+            table.add_column("Type")
+            table.add_column("Description")
+            table.add_column("Savings", style="green")
+            for s in result["suggestions"]:
+                table.add_row(s["type"], s["description"], f"~{s['estimated_savings_tokens']:,} tokens")
+            console.print(table)
+        else:
+            console.print("[green]Context looks good, no optimizations needed![/green]")
+    elif rest.strip() == "compare":
+        tokens = cmd_cost.optimizer.get_token_stats()
+        comparisons = cmd_cost.optimizer.compare_providers(tokens["input"], tokens["output"])
+        from rich.table import Table
+        table = Table(title="Provider Cost Comparison")
+        table.add_column("Provider", style="cyan")
+        table.add_column("Model")
+        table.add_column("Cost", style="green")
+        for c in comparisons[:10]:
+            table.add_row(c["provider"], c["model"], f"${c['cost']:.6f}")
+        console.print(table)
+    elif rest.strip() == "save":
+        cmd_cost.optimizer._save_history()
+        console.print("[green]Cost history saved[/green]")
+    else:
+        console.print("""💰 Cost Controls:
+  /cost               — Show cost analysis
+  /cost analyze       — Detailed analysis
+  /cost history       — Daily cost history
+  /cost budget <amt>  — Set session budget
+  /cost optimize      — Suggest context optimizations
+  /cost compare       — Compare provider costs
+  /cost save          — Save cost history""")
