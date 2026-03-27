@@ -39,7 +39,7 @@ def clear_edit_history():
 @pytest.fixture
 def sample_file(tmp_path):
     p = tmp_path / "test.txt"
-    p.write_text("Hello World\nLine 2\nLine 3\n", encoding="utf-8")
+    p.write_text("Hello World\nLine 2\nLine 3", encoding="utf-8")
     return p
 
 
@@ -263,7 +263,7 @@ class TestUndoStack:
     def test_undo_last(self, sample_file):
         write_file(str(sample_file), "new content")
         undo_last_edit()
-        assert sample_file.read_text() == "Hello World\nLine 2\nLine 3\n"
+        assert sample_file.read_text() == "Hello World\nLine 2\nLine 3"
 
     def test_undo_empty(self):
         assert undo_last_edit() is None

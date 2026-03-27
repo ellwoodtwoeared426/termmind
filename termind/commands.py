@@ -76,7 +76,7 @@ def handle_command(
 
 def cmd_help(rest: str, messages, client, console, cwd, ctx_files):
     table = Table(title="🧠 TermMind Commands", show_header=False, border_style="dim")
-    table.add_column("Command", style="command", min_width=25)
+    table.add_column("Command", style="cyan", min_width=25)
     table.add_column("Description", min_width=40)
     commands = [
         ("File Operations", "", True),
@@ -380,7 +380,7 @@ def cmd_provider(rest: str, messages, client, console, cwd, ctx_files):
 
 def cmd_providers(rest: str, messages, client, console, cwd, ctx_files):
     table = Table(title="Providers", border_style="dim")
-    table.add_column("Provider", style="command")
+    table.add_column("Provider", style="cyan")
     table.add_column("Default Model")
     table.add_column("Requires Key")
     table.add_column("Status")
@@ -396,7 +396,7 @@ def cmd_cost(rest: str, messages, client, console, cwd, ctx_files):
     tokens = client.total_tokens()
     cost = client.get_cost()
     table = Table(title="Session Cost", border_style="dim")
-    table.add_column("Metric", style="info")
+    table.add_column("Metric", style="bold cyan")
     table.add_column("Value")
     table.add_row("Provider", client.provider)
     table.add_row("Model", client.model)
@@ -488,7 +488,7 @@ def cmd_diff(rest: str, messages, client, console, cwd, ctx_files):
 
 def cmd_status(rest: str, messages, client, console, cwd, ctx_files):
     table = Table(title="Session Status", border_style="dim")
-    table.add_column("Setting", style="info")
+    table.add_column("Setting", style="bold cyan")
     table.add_column("Value")
     if git_is_repo(cwd):
         table.add_row("Git", git_branch(show_current=True, cwd=cwd))
@@ -667,7 +667,7 @@ def cmd_index(rest: str, messages, client, console, cwd, ctx_files):
     elapsed = time.time() - start
     summary = get_project_summary(cwd)
     table = Table(title="Code Index", border_style="dim")
-    table.add_column("Metric", style="info")
+    table.add_column("Metric", style="bold cyan")
     table.add_column("Value")
     table.add_row("Files", str(summary["total_files"]))
     table.add_row("Functions", str(summary["total_functions"]))
@@ -697,7 +697,7 @@ def cmd_capabilities(rest: str, messages, client, console, cwd, ctx_files):
     from .shell import get_capability_report
     report = get_capability_report()
     table = Table(title="Terminal Capabilities", border_style="dim")
-    table.add_column("Capability", style="info")
+    table.add_column("Capability", style="bold cyan")
     table.add_column("Value")
     table.add_row("Shell", report["shell"])
     table.add_row("Terminal", f"{report['term_program']} ({report['term']})")

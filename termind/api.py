@@ -32,7 +32,7 @@ class APIClient:
         cfg = load_config()
         info = get_provider_info(provider)
         self.provider = provider or cfg.get("provider", "ollama")
-        self.api_key = api_key or cfg.get("api_key", "")
+        self.api_key = api_key if api_key is not None else cfg.get("api_key", "")
         self.model = model or cfg.get("model", info["default_model"])
         self.base_url = (base_url or info["base_url"]).rstrip("/")
         self.max_tokens = max_tokens or cfg.get("max_tokens", 4096)
