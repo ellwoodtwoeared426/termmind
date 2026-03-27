@@ -1,12 +1,18 @@
-# TermMind 🧠
-
-> A modern, open-source AI terminal assistant. Free, beautiful, and lives in your terminal.
+<!-- Meta: TermMind is a free, open-source AI-powered terminal assistant supporting 7+ LLM providers. Chat with GPT, Claude, Gemini in your terminal with code analysis, file editing, and 40+ commands. -->
+<!-- Keywords: AI terminal assistant, CLI coding tool, GPT terminal, Claude terminal, coding assistant, AI code editor, terminal AI chat, LLM CLI tool -->
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/pypi/v/termmind?color=blue&label=PyPI" alt="PyPI version">
+  <img src="https://img.shields.io/badge/Python-3.9+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
-  <img src="https://img.shields.io/badge/CLI-Terminal-purple.svg" alt="CLI">
+  <img src="https://img.shields.io/pypi/dm/termmind?color=orange&label=Downloads" alt="Downloads">
+  <img src="https://img.shields.io/badge/Tests-227%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style">
 </p>
+
+<h1 align="center">TermMind — AI-Powered Terminal Assistant | Multi-Provider CLI Coding Tool</h1>
+
+> A modern, open-source AI terminal assistant. Free, beautiful, and lives in your terminal.
 
 ```
   ╔═════════════════════════════╗
@@ -437,4 +443,36 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <p align="center">
   Made with ❤️ by the TermMind contributors
+</p>
+
+## 💡 Why TermMind?
+
+- **7 providers, 1 tool** — No need to switch between ChatGPT, Claude, Gemini apps
+- **Code-aware** — Understands your project structure, not just isolated files
+- **Works offline** — Use Ollama or local models with zero API costs
+- **Extensible** — Plugin system lets you add custom commands
+- **Zero config** — Works out of the box, configure only when you want to
+- **Session history** — Never lose context between sessions
+
+## 👤 Who Uses This?
+
+| Role | How They Use It |
+|------|----------------|
+| **Full-Stack Devs** | Quick code generation, refactoring, and debugging across languages |
+| **DevOps Engineers** | Generate Dockerfiles, CI configs, and Terraform files |
+| **Students** | Learn programming with an AI tutor that explains concepts |
+| **Open Source Contributors** | Understand unfamiliar codebases quickly |
+| **AI Enthusiasts** | Experiment with multiple LLM providers side by side |
+
+## 🌐 Connect
+
+- [![GitHub](https://img.shields.io/badge/GitHub-rudra496-181717?logo=github)](https://github.com/rudra496)
+- [![Twitter](https://img.shields.io/badge/X-@rudra496-1DA1F2?logo=x)](https://x.com/rudra496)
+- [![Discord](https://img.shields.io/badge/Discord-Coming_Soon-5865F2?logo=discord)](#)
+
+---
+
+<p align="center">
+  <strong>Built with ❤️ by <a href="https://github.com/rudra496">rudra496</a></strong><br>
+  <sub>MIT License · Free & Open Source Forever</sub>
 </p>
