@@ -24,7 +24,7 @@ Think Claude Code or Aider, but **free, open-source, and lightweight**.
 ## ✨ Features
 
 - 🎨 **Beautiful terminal UI** — Syntax highlighting, markdown rendering, streaming responses
-- 🔌 **Multi-provider** — OpenAI, Google Gemini, Groq, Together.ai, OpenRouter, Ollama
+- 🔌 **Multi-provider** — OpenAI, Anthropic Claude, Google Gemini, Groq, Together.ai, OpenRouter, Ollama
 - 💰 **Free tiers supported** — Works with Gemini, Groq, and Ollama at zero cost
 - 📁 **Smart context** — Automatically includes relevant files from your project
 - ✏️ **File editing** — AI-powered file creation and editing with diff support

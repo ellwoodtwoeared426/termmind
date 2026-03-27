@@ -502,7 +502,7 @@ class OpenRouterProvider(BaseProvider):
         }
         url = f"{self.base_url}/chat/completions"
         headers = self._headers({
-            "HTTP-Referer": "https://github.com/nicepkg/termmind",
+            "HTTP-Referer": "https://github.com/rudra496/termmind",
             "X-Title": "TermMind",
         })
 
